@@ -101,6 +101,14 @@ namespace dnlib.DotNet.Writer {
 			return methodBody;
 		}
 
+		public bool Remove(MethodBody methodBody)
+		{
+			if (setOffsetCalled)
+				throw new InvalidOperationException("SetOffset() has already been called");
+			var list = methodBody.IsFat ? fatMethods : tinyMethods;
+			return list.Remove(methodBody);
+		}
+
 		internal void InitializeReusedMethodBodies(IPEImage peImage, uint fileOffsetDelta) {
 			foreach (var info in reusedMethods) {
 				var offset = peImage.ToFileOffset(info.RVA) + fileOffsetDelta;
