@@ -134,7 +134,7 @@ namespace dnlib.DotNet.Emit {
 		/// </summary>
 		public int Index {
 			get => index;
-			internal set => index = value;
+			set => index = value;
 		}
 
 		/// <summary>
