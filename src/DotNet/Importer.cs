@@ -44,6 +44,38 @@ namespace dnlib.DotNet {
 	}
 
 	/// <summary>
+	/// Provides a chance to resolve definition when <see cref="Importer"/> encountered a definition to import.
+	/// </summary>
+	public class ImportResolver {
+		/// <summary>
+		/// Resolves the specified TypeDef.
+		/// </summary>
+		/// <param name="typeDef">The TypeDef.</param>
+		/// <returns>The resolved TypeDef, or <c>null</c> if cannot be resolved.</returns>
+		public virtual TypeDef Resolve(TypeDef typeDef) {
+			return null;
+		}
+
+		/// <summary>
+		/// Resolves the specified MethodDef.
+		/// </summary>
+		/// <param name="methodDef">The MethodDef.</param>
+		/// <returns>The resolved MethodDef, or <c>null</c> if cannot be resolved.</returns>
+		public virtual MethodDef Resolve(MethodDef methodDef) {
+			return null;
+		}
+
+		/// <summary>
+		/// Resolves the specified FieldDef.
+		/// </summary>
+		/// <param name="methodDef">The FieldDef.</param>
+		/// <returns>The resolved FieldDef, or <c>null</c> if cannot be resolved.</returns>
+		public virtual FieldDef Resolve(FieldDef fieldDef) {
+			return null;
+		}
+	}
+
+	/// <summary>
 	/// Imports <see cref="Type"/>s, <see cref="ConstructorInfo"/>s, <see cref="MethodInfo"/>s
 	/// and <see cref="FieldInfo"/>s as references
 	/// </summary>
@@ -52,6 +84,7 @@ namespace dnlib.DotNet {
 		readonly GenericParamContext gpContext;
 		RecursionCounter recursionCounter;
 		ImporterOptions options;
+		ImportResolver resolver;
 
 		bool TryToUseTypeDefs => (options & ImporterOptions.TryToUseTypeDefs) != 0;
 		bool TryToUseMethodDefs => (options & ImporterOptions.TryToUseMethodDefs) != 0;
@@ -65,6 +98,15 @@ namespace dnlib.DotNet {
 				else
 					options &= ~ImporterOptions.FixSignature;
 			}
+		}
+
+		/// <summary>
+		/// Gets or sets the resolver used to resolve definitions.
+		/// </summary>
+		/// <value>The resolver.</value>
+		public ImportResolver Resolver {
+			get { return resolver; }
+			set { resolver = value; }
 		}
 
 		/// <summary>
@@ -104,6 +146,7 @@ namespace dnlib.DotNet {
 			recursionCounter = new RecursionCounter();
 			this.options = options;
 			this.gpContext = gpContext;
+			this.resolver = null;
 		}
 
 		/// <summary>
@@ -615,6 +658,13 @@ namespace dnlib.DotNet {
 				return null;
 			if (TryToUseTypeDefs && type.Module == module)
 				return type;
+
+			if (resolver != null) {
+				ITypeDefOrRef result = resolver.Resolve(type);
+				if (result != null)
+					return result;
+			}
+
 			return Import2(type);
 		}
 
@@ -972,6 +1022,12 @@ namespace dnlib.DotNet {
 			if (!recursionCounter.Increment())
 				return null;
 
+			if (resolver != null) {
+				IField resultField = resolver.Resolve(field);
+				if (resultField != null)
+					return resultField;
+			}
+
 			MemberRef result = module.UpdateRowId(new MemberRefUser(module, field.Name));
 			result.Signature = Import(field.Signature);
 			result.Class = ImportParent(field.DeclaringType);
@@ -1000,6 +1056,12 @@ namespace dnlib.DotNet {
 				return method;
 			if (!recursionCounter.Increment())
 				return null;
+
+			if (resolver != null) {
+				IMethod resultMethod = resolver.Resolve(method);
+				if (resultMethod != null)
+					return resultMethod;
+			}
 
 			MemberRef result = module.UpdateRowId(new MemberRefUser(module, method.Name));
 			result.Signature = Import(method.Signature);
