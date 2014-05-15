@@ -45,7 +45,6 @@ For better *Windows PDB* writer support, you should add a reference to `Microsof
     <LangVersion>8.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\LICENSE.txt" Pack="true" PackagePath="" />
     <None Include="..\README.md" Link="README.md" />
