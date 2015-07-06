@@ -713,7 +713,7 @@ namespace dnlib.DotNet {
 			if (defAsm is null)
 				return null;
 			if (defAsm.IsCorLib())
-				return defMod.CorLibTypes.AssemblyRef;
+				return module.CorLibTypes.AssemblyRef;
 
 			var modAsm = module.Assembly;
 			if (!(defMod is null) && !(defAsm is null) && !(modAsm is null)) {
