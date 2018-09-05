@@ -11,7 +11,7 @@ namespace dnlib.DotNet {
 	/// </summary>
 	sealed class TypeDefFinder : ITypeDefFinder, IDisposable {
 		const SigComparerOptions TypeComparerOptions = SigComparerOptions.DontCompareTypeScope | SigComparerOptions.TypeRefCanReferenceGlobalType;
-		bool isCacheEnabled;
+		bool isCacheEnabled = true;
 		readonly bool includeNestedTypes;
 		Dictionary<ITypeDefOrRef, TypeDef> typeRefCache = new Dictionary<ITypeDefOrRef, TypeDef>(new TypeEqualityComparer(TypeComparerOptions));
 		Dictionary<string, TypeDef> normalNameCache = new Dictionary<string, TypeDef>(StringComparer.Ordinal);
@@ -96,7 +96,14 @@ namespace dnlib.DotNet {
 				typeEnumerator.Dispose();
 				typeEnumerator = null;
 			}
-			typeEnumerator = (includeNestedTypes ? AllTypesHelper.Types(rootTypes) : rootTypes).GetEnumerator();
+
+			InitializeTypeEnumeratorIfNull();
+		}
+		
+		void InitializeTypeEnumeratorIfNull() {
+			if (typeEnumerator == null) {
+				typeEnumerator = (includeNestedTypes ? AllTypesHelper.Types(rootTypes) : rootTypes).GetEnumerator();
+			}
 		}
 
 		/// <summary>
@@ -147,6 +154,7 @@ namespace dnlib.DotNet {
 			if (typeRefCache.TryGetValue(typeRef, out var cachedType))
 				return cachedType;
 
+			InitializeTypeEnumeratorIfNull();
 			// Build the cache lazily
 			var comparer = new SigComparer(TypeComparerOptions);
 			while (true) {
@@ -160,6 +168,7 @@ namespace dnlib.DotNet {
 			if (reflectionNameCache.TryGetValue(fullName, out var cachedType))
 				return cachedType;
 
+			InitializeTypeEnumeratorIfNull();
 			// Build the cache lazily
 			while (true) {
 				cachedType = GetNextTypeDefCache();
@@ -174,7 +183,8 @@ namespace dnlib.DotNet {
 		TypeDef FindCacheNormal(string fullName) {
 			if (normalNameCache.TryGetValue(fullName, out var cachedType))
 				return cachedType;
-
+			
+			InitializeTypeEnumeratorIfNull();
 			// Build the cache lazily
 			while (true) {
 				cachedType = GetNextTypeDefCache();
