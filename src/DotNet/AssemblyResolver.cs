@@ -29,7 +29,7 @@ namespace dnlib.DotNet {
 
 		ModuleContext defaultModuleContext;
 		readonly Dictionary<ModuleDef, IList<string>> moduleSearchPaths = new Dictionary<ModuleDef, IList<string>>();
-		readonly Dictionary<string, AssemblyDef> cachedAssemblies = new Dictionary<string, AssemblyDef>(StringComparer.Ordinal);
+		readonly Dictionary<string, AssemblyDef> cachedAssemblies = new Dictionary<string, AssemblyDef>(StringComparer.OrdinalIgnoreCase);
 		readonly IList<string> preSearchPaths = new List<string>();
 		readonly IList<string> postSearchPaths = new List<string>();
 		bool findExactMatch;
@@ -286,8 +286,7 @@ namespace dnlib.DotNet {
 
 			// Dupe assembly. Don't insert it.
 			var dupeModule = resolvedAssembly.ManifestModule;
-			if (dupeModule != null)
-				dupeModule.Dispose();
+			dupeModule?.Dispose();
 			return asm1 ?? asm2;
 #if THREAD_SAFE
 			} finally { theLock.ExitWriteLock(); }
@@ -388,7 +387,7 @@ namespace dnlib.DotNet {
 
 		static string GetAssemblyNameKey(IAssembly asmName) {
 			// Make sure the name contains PublicKeyToken= and not PublicKey=
-			return asmName.FullNameToken.ToUpperInvariant();
+			return asmName.FullNameToken;
 		}
 
 		AssemblyDef Resolve2(IAssembly assembly, ModuleDef sourceModule) {
