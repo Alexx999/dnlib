@@ -81,6 +81,10 @@ namespace dnlib.DotNet.Pdb.WindowsPdb {
 				if (recVersion == CustomDebugInfoConstants.RecordVersion) {
 					ulong recPosEnd = (ulong)reader.Position - 8 + (uint)recSize - (uint)alignmentSize;
 					var cdi = ReadRecord(recKind, recPosEnd);
+					if (recKind == PdbCustomDebugInfoKind.StateMachineTypeName && cdi == null) {
+						// State machine type might be renamed at this point
+						continue;
+					}
 					Debug.Assert(cdi != null);
 					Debug.Assert(reader.Position <= recPosEnd);
 					if (reader.Position > recPosEnd)

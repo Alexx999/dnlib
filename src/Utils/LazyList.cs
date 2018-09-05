@@ -217,11 +217,9 @@ namespace dnlib.Utils {
 		}
 
 		void Insert_NoLock(int index, TValue item) {
-			if (listener != null)
-				listener.OnAdd(index, item);
+			listener?.OnAdd(index, item);
 			list.Insert(index, new Element(item));
-			if (listener != null)
-				listener.OnResize(index);
+			listener?.OnResize(index);
 			id++;
 		}
 
@@ -237,11 +235,9 @@ namespace dnlib.Utils {
 		}
 
 		void RemoveAt_NoLock(int index) {
-			if (listener != null)
-				listener.OnRemove(index, list[index].GetValue_NoLock(index));
+			listener?.OnRemove(index, list[index].GetValue_NoLock(index));
 			list.RemoveAt(index);
-			if (listener != null)
-				listener.OnResize(index);
+			listener?.OnResize(index);
 			id++;
 		}
 
@@ -258,11 +254,9 @@ namespace dnlib.Utils {
 
 		void Add_NoLock(TValue item) {
 			int index = list.Count;
-			if (listener != null)
-				listener.OnAdd(index, item);
+			listener?.OnAdd(index, item);
 			list.Add(new Element(item));
-			if (listener != null)
-				listener.OnResize(index);
+			listener?.OnResize(index);
 			id++;
 		}
 
@@ -278,11 +272,9 @@ namespace dnlib.Utils {
 		}
 
 		void Clear_NoLock() {
-			if (listener != null)
-				listener.OnClear();
+			listener?.OnClear();
 			list.Clear();
-			if (listener != null)
-				listener.OnResize(0);
+			listener?.OnResize(0);
 			id++;
 		}
 
