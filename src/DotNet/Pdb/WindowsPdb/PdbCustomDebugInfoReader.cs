@@ -85,14 +85,12 @@ namespace dnlib.DotNet.Pdb.WindowsPdb {
 						// State machine type might be renamed at this point
 						continue;
 					}
-					Debug.Assert(cdi != null);
+					if(cdi == null) return;
 					Debug.Assert(reader.Position <= recPosEnd);
 					if (reader.Position > recPosEnd)
 						return;
-					if (cdi != null) {
-						Debug.Assert(cdi.Kind == recKind);
-						result.Add(cdi);
-					}
+					Debug.Assert(cdi.Kind == recKind);
+					result.Add(cdi);
 				}
 
 				reader.Position = nextRecPos;
